@@ -21,7 +21,8 @@ h1{font-size:clamp(1.7rem,6vw,3.2rem);line-height:1.05}
  background:var(--card);border:2.5px solid var(--bd);border-radius:99px;padding:9px 16px;box-shadow:3px 3px 0 var(--sh);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .back{align-self:flex-start}
 .theme{position:absolute;top:14px;right:clamp(12px,3vw,40px);z-index:30}
-.theme svg{width:16px;height:16px;fill:currentColor}
+.theme{width:44px;height:44px;padding:0;justify-content:center}
+.theme svg{width:20px;height:20px;fill:currentColor}
 .back:active,.theme:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--sh)}
 .btn{display:inline-block;text-decoration:none;color:#0b0b0b;font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:1.05rem;padding:15px 28px;background:var(--acc);
  border:3px solid var(--bd);border-radius:99px;box-shadow:5px 5px 0 var(--sh);text-align:center;cursor:pointer}
@@ -94,3 +95,14 @@ h1{font-size:clamp(1.7rem,6vw,3.2rem);line-height:1.05}
 #bar::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--dkt);border:4px solid var(--acc)}
 #bar::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--dkt);border:4px solid var(--acc)}
 @media(max-width:560px){.card{box-shadow:5px 5px 0 var(--sh);border-radius:20px}.theme{right:12px}}
+
+/* headings: same chunky style as the home cards, first letter capital */
+h1{font-family:'Bowlby One','Archivo Black',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;font-size:clamp(1.8rem,7.6vw,3rem);line-height:1.08;padding-bottom:8px;
+ --hf:var(--acc);--hs:#101010;color:var(--hf);
+ text-shadow:-2px -2px 0 #0b0b0b,2px -2px 0 #0b0b0b,-2px 2px 0 #0b0b0b,2px 2px 0 #0b0b0b,0 -2px 0 #0b0b0b,0 2px 0 #0b0b0b,-2px 0 0 #0b0b0b,2px 0 0 #0b0b0b,
+ 3px 3px 0 var(--hs),4px 4px 0 var(--hs),5px 5px 0 var(--hs),6px 6px 0 var(--hs),7px 7px 0 #0b0b0b}
+[data-theme=dark] h1{--hf:#f4f3ee;--hs:var(--acc)}
+/* "cooking" empty state */
+.cook{padding:18px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.cook img{width:100%;max-width:520px;height:auto;display:block;border:3px solid var(--bd);border-radius:18px}
+.cook p{font-size:clamp(1.15rem,4.4vw,1.5rem);font-weight:800;line-height:1.35}

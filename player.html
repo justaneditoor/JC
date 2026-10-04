@@ -33,11 +33,12 @@ function follow(e){
 async function init(){
  if(!folder)return fail("No script selected. Go back to All scripts.");
  const info=await readInfo("scripts",folder);
- $("title").textContent=info.title;$("np").textContent=info.title;document.title=info.title;
+ $("title").textContent=cap(info.title);$("np").textContent=info.title;document.title=info.title;
  if(info.video){$("res").hidden=false;$("res").append(buildEmbed(info.video,info.wide,true))}
  const base="scripts/"+encodeURIComponent(folder)+"/";let txt,ab;
  try{
   const [a,b]=await Promise.all([fetch(base+"script.txt?"+Date.now()),fetch(base+"audio.mp3")]);
+  if(a.status===404||b.status===404){box.innerHTML="";box.append(cookBox());return}
   if(!a.ok||!b.ok)throw 0;txt=await a.text();ab=await b.arrayBuffer();
  }catch(e){return fail("Could not load script.txt / audio.mp3 from folder: "+folder+". Open this page from your live link (not by double-clicking the file), and check that both files are inside the folder.")}
  audio.src=URL.createObjectURL(new Blob([ab],{type:"audio/mpeg"}));

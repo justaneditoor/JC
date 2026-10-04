@@ -54,6 +54,8 @@ function buildEmbed(url,wide,showOpen){
   a.textContent=!i?"Open the video":i.type==="ig"?"Open on Instagram":i.type==="drive"?"Open in Google Drive":"Open on YouTube";w.append(a)}
  return w;
 }
+const cap=t=>{t=(t||"").trim();return t.charAt(0).toUpperCase()+t.slice(1).toLowerCase()};
+const cookBox=()=>{const d=el("div","cook"),i=el("img"),p=el("p");i.src="cooking.jpg";i.alt="";p.textContent="Editor cooking something harder for you, check back later";d.append(i,p);return d};
 const msg=t=>{const d=el("div","card msg");d.textContent=t;return d};
 const FOLDER='<svg viewBox="0 0 24 24" fill="none" stroke="#0b0b0b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H9l2 2.5h7.5A2.5 2.5 0 0 1 21 9v8.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>';
 const COLORS=["#2ee84f","#f5b800"];
@@ -85,8 +87,14 @@ const SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M11 
 const MOON='<svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></svg>';
 function initTheme(){
  const root=document.documentElement,b=el("button","theme");b.type="button";
- const paint=()=>{const d=root.dataset.theme==="dark";b.innerHTML=(d?SUN+"Light":MOON+"Dark");b.setAttribute("aria-label",d?"Switch to light mode":"Switch to dark mode")};
+ const paint=()=>{const d=root.dataset.theme==="dark";b.innerHTML=d?SUN:MOON;b.setAttribute("aria-label",d?"Switch to light mode":"Switch to dark mode")};
+ const stored=()=>{try{return localStorage.getItem("theme")}catch(e){return null}};
+ const sync=()=>{const t=stored();if(t&&t!==root.dataset.theme){root.dataset.theme=t;paint();dispatchEvent(new Event("themechange"))}};
  b.onclick=()=>{const t=root.dataset.theme==="dark"?"light":"dark";root.dataset.theme=t;try{localStorage.setItem("theme",t)}catch(e){}paint();dispatchEvent(new Event("themechange"))};
+ /* keep every page in step: pages restored from the back button, other tabs, or returning to the app */
+ addEventListener("pageshow",sync);addEventListener("focus",sync);
+ addEventListener("storage",e=>{if(e.key==="theme")sync()});
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden)sync()});
  paint();document.body.append(b);
 }
 function initFX(){
@@ -109,4 +117,4 @@ function initFX(){
  size();addEventListener("resize",size);addEventListener("themechange",()=>{if(still)requestAnimationFrame(frame)});requestAnimationFrame(frame);
 }
 if(typeof document!=="undefined"){initTheme();initFX()}
-if(typeof module!=="undefined")module.exports={embedInfo,parseInfo,pretty,numOf,natural,driveDownload};
+if(typeof module!=="undefined")module.exports={cap,embedInfo,parseInfo,pretty,numOf,natural,driveDownload};
