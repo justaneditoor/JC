@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}catch(e){document.documentElement.dataset.theme="light"}</script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bowlby+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,800&family=Caveat:wght@500&family=Silkscreen&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"><title>Admin</title>
+<style>
+.pin,.fm{padding:clamp(18px,4vw,30px);display:flex;flex-direction:column;gap:16px}
+.pin{max-width:380px;margin:auto;align-items:center;text-align:center;width:100%}
+.dots{display:flex;gap:12px}.dots i{width:48px;height:58px;border:3px solid var(--bd);border-radius:14px;display:grid;place-items:center;background:var(--bg)}
+.dots i.on::after{content:"";width:18px;height:18px;border-radius:50%;background:var(--acc);border:3px solid var(--bd)}
+.shake{animation:sh .4s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.keys button{font-family:'Archivo Black',sans-serif;font-size:1.5rem;padding:14px 0;color:var(--ink);background:var(--card);border:3px solid var(--bd);border-radius:18px;box-shadow:3px 3px 0 var(--sh);cursor:pointer}
+.keys button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--sh)}
+.tabs,.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tabs button.on{background:var(--acc);color:#0b0b0b}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:800;text-align:left}
+input,textarea,select{font:inherit;font-weight:500;padding:12px 14px;border:3px solid var(--bd);border-radius:14px;background:var(--bg);color:var(--ink);width:100%}
+textarea{resize:vertical;line-height:1.5}
+.row .ttl{flex:1;min-width:0}.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.dng{background:#ff5a4d;color:#0b0b0b}
+.err{color:#ff5a4d;font-weight:800}
+</style></head><body>
+<main><div class="logo px">&gt; Admin</div><div id="app"></div></main>
+<script src="lib.js"></script>
+<script>
+const PIN="6767",{o,r}=repo();let tab="videos",token=localStorage.getItem("ghtoken")||"",notice="";
+const app=$("app"),base="https://api.github.com/repos/"+o+"/"+r;
+const hdr=(x={})=>({Accept:"application/vnd.github+json",Authorization:"Bearer "+token,...x});
+async function gh(p,opt={}){const res=await fetch(base+p,{cache:"no-store",...opt,headers:hdr(opt.headers)});
+ if(!res.ok){const e=new Error("http");e.status=res.status;throw e}return res.status===204?null:res.json()}
+async function raw(p){const res=await fetch(base+"/contents/"+p,{cache:"no-store",headers:hdr({Accept:"application/vnd.github.raw+json"})});if(!res.ok)throw 0;return res.text()}
+const cp=p=>"/contents/"+p.split("/").map(encodeURIComponent).join("/");
+const ls=async d=>{try{return await gh(cp(d))}catch(e){if(e.status===404)return[];throw e}};
+const put=(p,b64,sha,m)=>gh(cp(p),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:m,content:b64,...(sha?{sha}:{})})});
+const del=(p,sha,m)=>gh(cp(p),{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:m,sha})});
+const enc=t=>{const b=new TextEncoder().encode(t);let s="";for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode(...b.subarray(i,i+8192));return btoa(s)};
+const fb64=f=>new Promise((ok,no)=>{const x=new FileReader();x.onload=()=>ok(x.result.split(",")[1]);x.onerror=no;x.readAsDataURL(f)});
+const slug=t=>t.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,28);
+const explain=e=>e.status===401?"The GitHub token is wrong or expired. Tap Disconnect and add a new one.":e.status===403||e.status===404?"GitHub says no. Check the token allows 'Contents: Read and write' for the repository "+r+".":e.status===409||e.status===422?"A save clashed with another one. Wait a few seconds and try again.":"Something went wrong"+(e.status?" ("+e.status+")":"")+". Check your internet and try again.";
+const btn=(c,t,f)=>{const b=el("button",c);b.type="button";b.textContent=t;b.onclick=f;return b};
+
+function gate(){
+ app.innerHTML='<div class="card pin"><h1>Admin</h1><p class="px hint">Enter PIN</p><div class="dots" id="dots"><i></i><i></i><i></i><i></i></div><p class="hint" id="pm">&nbsp;</p><div class="keys" id="keys"></div></div>';
+ let v="",busy=false;const dots=[...document.querySelectorAll("#dots i")];
+ const paint=()=>dots.forEach((d,i)=>d.classList.toggle("on",i<v.length));
+ const press=k=>{if(busy)return;if(k==="x")v=v.slice(0,-1);else if(k==="c")v="";else if(v.length<4)v+=k;paint();
+  if(v.length===4){if(v===PIN){removeEventListener("keydown",kd);sessionStorage.setItem("adm","1");start()}
+   else{busy=true;$("pm").textContent="Wrong PIN";$("dots").classList.add("shake");setTimeout(()=>{$("dots").classList.remove("shake");v="";busy=false;paint();$("pm").innerHTML="&nbsp;"},500)}}};
+ const kd=e=>{if(/^\d$/.test(e.key))press(e.key);else if(e.key==="Backspace")press("x")};
+ addEventListener("keydown",kd);
+ const L={c:"CLR",x:"\u232B"};["1","2","3","4","5","6","7","8","9","c","0","x"].forEach(k=>{const b=el("button");b.textContent=L[k]||k;b.onclick=()=>press(k);$("keys").append(b)});
+}
+function start(){token?dash():connect()}
+function connect(m){
+ app.innerHTML='<div class="card fm"><h1>Connect GitHub</h1><p class="hint">Repository: <b></b></p><label class="fld">GitHub token<input id="tok" type="password" autocomplete="off" placeholder="github_pat_..."></label><p class="hint">Paste it once. It is kept only in this browser.</p><p class="err" id="cm"></p><div class="bar"></div></div>';
+ app.querySelector("b").textContent=o+"/"+r;if(m)$("cm").textContent=m;
+ app.querySelector(".bar").append(btn("btn","Connect",async()=>{token=$("tok").value.trim();
+  try{const j=await gh("");if(!j.permissions||!j.permissions.push)throw{status:403};localStorage.setItem("ghtoken",token);dash()}catch(e){token="";$("cm").textContent=explain(e)}}));
+}
+async function dash(){
+ app.innerHTML='<div style="display:flex;flex-direction:column;gap:18px"><div class="tabs"></div><div class="bar"></div><p class="hint" id="nt"></p><div class="list" id="items"></div></div>';
+ const tabs=app.querySelector(".tabs"),bar=app.querySelector(".bar");
+ [["videos","Final Videos"],["scripts","Video Scripts"]].forEach(([k,l])=>{const b=btn("back"+(tab===k?" on":""),l,()=>{tab=k;dash()});tabs.append(b)});
+ bar.append(btn("btn","+ Add new",()=>form(null)),btn("back","Disconnect",()=>{localStorage.removeItem("ghtoken");token="";connect()}));
+ $("nt").textContent=notice;notice="";
+ const box=$("items");box.append(msg("Loading..."));
+ try{
+  const names=natural((await ls(tab)).filter(x=>x.type==="dir").map(x=>x.name)).reverse();
+  const ts=await Promise.all(names.map(n=>raw(tab+"/"+n+"/info.txt").then(t=>parseInfo(t).title||pretty(n)).catch(()=>pretty(n))));
+  box.innerHTML="";if(!names.length)box.append(msg("Nothing here yet. Tap + Add new."));
+  names.forEach((n,i)=>{const row=el("div","card row"),num=el("span","num"),t=el("span","ttl"),a=el("div","acts");
+   num.textContent=numOf(n,0);t.textContent=ts[i];
+   const idle=()=>{a.innerHTML="";a.append(btn("back","Edit",()=>form(n)),btn("back","Delete",ask))};
+   const ask=()=>{a.innerHTML="";a.append(btn("back dng","Yes, delete",()=>remove(n,a)),btn("back","Cancel",idle))};
+   idle();row.append(num,t,a);box.append(row)});
+ }catch(e){box.innerHTML="";box.append(msg(explain(e)))}
+}
+async function remove(n,a){
+ a.textContent="Deleting...";
+ try{const fs=await ls(tab+"/"+n);for(const f of fs)await del(tab+"/"+n+"/"+f.name,f.sha,"Delete "+n);notice="Deleted. The live site updates in 1-2 minutes."}
+ catch(e){notice=explain(e)}
+ dash();
+}
+async function form(item){
+ const sc=tab==="scripts",k=tab;
+ app.innerHTML='<div class="card fm"><h1></h1>'+
+  '<label class="fld">Title<input id="ft"></label>'+
+  '<label class="fld">'+(sc?"Instagram video link":"YouTube link (clients watch this)")+'<input id="fv" placeholder="https://..."></label>'+
+  (sc?"":'<label class="fld">Google Drive link (for the Download button)<input id="fd" placeholder="https://drive.google.com/..."></label>')+
+  '<label class="fld">Video shape<select id="fs"><option value="vertical">Vertical (reel)</option><option value="wide">Wide (16:9)</option></select></label>'+
+  (sc?'<label class="fld">Script text<textarea id="fx" rows="14" placeholder="One line per line. Blank line = new paragraph. Put *stars* around bold lines."></textarea></label><label class="fld">Audio (MP3 only)<input id="fa" type="file" accept=".mp3,audio/mpeg"></label>':"")+
+  '<p class="hint" id="st"></p><div class="bar"></div></div>';
+ app.querySelector("h1").textContent=(item?"Edit ":"New ")+(sc?"script":"video");
+ const st=m=>{$("st").textContent=m},sh={};
+ const bar=app.querySelector(".bar"),save=btn("btn","Save",go),cancel=btn("back","Cancel",dash);bar.append(save,cancel);
+ if(item){st("Loading...");save.disabled=true;
+  try{(await ls(k+"/"+item)).forEach(f=>sh[f.name]=f.sha);
+   const i=parseInfo(await raw(k+"/"+item+"/info.txt").catch(()=>""));
+   $("ft").value=i.title||pretty(item);$("fv").value=i.video;if(!sc)$("fd").value=i.download;$("fs").value=i.wide?"wide":"vertical";
+   if(sc)$("fx").value=await raw(k+"/"+item+"/script.txt").catch(()=>"");st("")}
+  catch(e){st(explain(e));return}
+  save.disabled=false}
+ async function go(){
+  const t=$("ft").value.trim(),v=$("fv").value.trim(),d=sc?"":$("fd").value.trim(),w=$("fs").value==="wide";
+  if(!t)return st("Please enter a title.");
+  let tx="",au=null;
+  if(sc){tx=$("fx").value.replace(/\r/g,"").trim();au=$("fa").files[0]||null;
+   if(!tx)return st("Please paste the script text.");
+   if(!item&&!au)return st("Please choose the MP3 audio file.");
+   if(au&&!/\.mp3$/i.test(au.name))return st("Audio must be an MP3 file.");
+   if(au&&au.size>25*1024*1024)return st("That audio is over 25 MB. Export it smaller (96 kbps mono).")}
+  save.disabled=true;
+  try{
+   let folder=item;
+   if(!item){const dirs=(await ls(k)).filter(x=>x.type==="dir").map(x=>x.name);
+    folder=String(Math.max(0,...dirs.map(n=>+(n.match(/^\d+/)||[0])[0]))+1).padStart(2,"0")+"-"+(slug(t)||"item")}
+   const info="Title: "+t+"\nVideo: "+v+(d?"\nDownload: "+d:"")+"\nShape: "+(w?"wide":"vertical")+"\n";
+   const fl=[{n:"info.txt",b:enc(info)}];
+   if(sc){fl.push({n:"script.txt",b:enc(tx+"\n")});if(au)fl.push({n:"audio.mp3",b:await fb64(au)})}
+   for(let i=0;i<fl.length;i++){st("Saving "+(i+1)+" of "+fl.length+"...");await put(k+"/"+folder+"/"+fl[i].n,fl[i].b,sh[fl[i].n],(item?"Update ":"Add ")+folder)}
+   notice="Saved. The live site updates in 1-2 minutes.";dash();
+  }catch(e){st(explain(e));save.disabled=false}
+ }
+}
+sessionStorage.getItem("adm")==="1"?start():gate();
+</script></body></html>
