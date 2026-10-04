@@ -30,7 +30,7 @@ function parseInfo(t){
 }
 async function readInfo(dir,name){
  let o={};
- try{const r=await fetch(dir+"/"+encodeURIComponent(name)+"/info.txt?"+Date.now());if(r.ok)o=parseInfo(await r.text())}catch(e){}
+ try{const r=await fetch(dir+"/"+encodeURIComponent(name)+"/info.txt?"+Date.now(),{cache:"no-store"});if(r.ok){o=parseInfo(await r.text());o.live=true}}catch(e){}
  o.title=o.title||pretty(name);return o;
 }
 const driveId=u=>{const m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/)||u.match(/drive\.google\.com\/(?:open|uc)\?(?:[^#]*&)?id=([\w-]+)/);return m?m[1]:null};
@@ -55,7 +55,7 @@ function buildEmbed(url,wide,showOpen){
  return w;
 }
 const cap=t=>{t=(t||"").trim();return t.charAt(0).toUpperCase()+t.slice(1).toLowerCase()};
-const cookBox=()=>{const d=el("div","cook"),i=el("img"),p=el("p");i.src="cooking.jpg";i.alt="";p.textContent="Editor cooking something harder for you, check back later";d.append(i,p);return d};
+const cookBox=()=>{const d=el("div","cook"),i=el("img"),p=el("p");i.src="cooking.jpg?v=9";i.alt="";p.textContent="Editor cooking something harder for you, check back later";d.append(i,p);return d};
 const msg=t=>{const d=el("div","card msg");d.textContent=t;return d};
 const FOLDER='<svg viewBox="0 0 24 24" fill="none" stroke="#0b0b0b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H9l2 2.5h7.5A2.5 2.5 0 0 1 21 9v8.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>';
 const COLORS=["#2ee84f","#f5b800"];
@@ -67,7 +67,9 @@ async function folderList(dir,kind){
    box.append(msg(kind==="video"?"No videos yet. On GitHub, create a folder like videos/01-my-topic/ with an info.txt inside it.":"No scripts yet. On GitHub, create a folder like scripts/01-my-topic/ with audio.mp3, script.txt and info.txt inside it."));return}
   const infos=await Promise.all(names.map(n=>readInfo(dir,n)));
   box.innerHTML="";
-  names.map((n,i)=>({n,i,info:infos[i]})).reverse().forEach(({n,i,info})=>{
+  const ready=names.map((n,i)=>({n,i,info:infos[i]})).filter(x=>x.info.live);
+  if(!ready.length){box.className="list";box.append(msg("New content is being published. Check back in a minute or two."));return}
+  ready.reverse().forEach(({n,i,info})=>{
    const num=numOf(n,i);
    if(kind==="video"){
     const a=el("a","fold");a.href="video.html?f="+encodeURIComponent(n);a.style.setProperty("--c",COLORS[i%COLORS.length]);

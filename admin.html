@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}catch(e){document.documentElement.dataset.theme="light"}</script>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bowlby+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,800&family=Caveat:wght@500&family=Silkscreen&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css"><title>Admin</title>
+<link rel="stylesheet" href="style.css?v=9"><title>Admin</title>
 <style>
 /* RED THEME - admin page only */
 :root{--acc:#e5262b;--hl:rgba(229,38,43,.28)}
@@ -59,7 +59,7 @@ textarea{resize:vertical;line-height:1.5}
 (function(){var d=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,"fillStyle");
 Object.defineProperty(CanvasRenderingContext2D.prototype,"fillStyle",{get:d.get,set:function(v){if(typeof v==="string")v=v.replace("rgba(46,232,79,","rgba(229,38,43,");d.set.call(this,v)}})})();
 </script>
-<script src="lib.js"></script>
+<script src="lib.js?v=9"></script>
 <script>
 const PIN="6767",{o,r}=repo();let tab="videos",token=localStorage.getItem("ghtoken")||"",notice="";
 const app=$("app"),base="https://api.github.com/repos/"+o+"/"+r;
@@ -139,7 +139,7 @@ async function dash(){
 }
 async function remove(n,a){
  a.textContent="Deleting...";
- try{const fs=await ls(tab+"/"+n);for(const f of fs)await del(tab+"/"+n+"/"+f.name,f.sha,"Delete "+n);notice="Deleted. The live site updates in 1-2 minutes."}
+ try{const fs=await ls(tab+"/"+n);for(const f of fs)await del(tab+"/"+n+"/"+f.name,f.sha,"Delete "+n);notice="Deleted. GitHub needs 1-3 minutes to publish it to the live site."}
  catch(e){notice=explain(e)}
  dash();
 }
@@ -184,10 +184,11 @@ async function form(item){
    if(!item){const dirs=(await ls(k)).filter(x=>x.type==="dir").map(x=>x.name);
     folder=String(Math.max(0,...dirs.map(n=>+(n.match(/^\d+/)||[0])[0]))+1).padStart(2,"0")+"-"+(slug(t)||"item")}
    const info="Title: "+t+"\nVideo: "+v+(d?"\nDownload: "+d:"")+"\nShape: "+(w?"wide":"vertical")+"\n";
-   const fl=[{n:"info.txt",b:enc(info)}];
+   const fl=[];
    if(sc){fl.push({n:"script.txt",b:enc(tx+"\n")});if(au)fl.push({n:"audio.mp3",b:await fb64(au)})}
+   fl.push({n:"info.txt",b:enc(info)});
    for(let i=0;i<fl.length;i++){st("Saving "+(i+1)+" of "+fl.length+"...");await put(k+"/"+folder+"/"+fl[i].n,fl[i].b,sh[fl[i].n],(item?"Update ":"Add ")+folder)}
-   notice="Saved. The live site updates in 1-2 minutes.";dash();
+   notice="Saved. GitHub needs 1-3 minutes to publish it to the live site.";dash();
   }catch(e){st(explain(e));save.disabled=false}
  }
 }
