@@ -3,6 +3,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bowlby+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,800&family=Caveat:wght@500&family=Silkscreen&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css"><title>Admin</title>
 <style>
+/* RED THEME - admin page only */
+:root{--acc:#e5262b;--hl:rgba(229,38,43,.28)}
+[data-theme=dark]{--acc:#ff4a4a;--sh:#ff4a4a;--hl:rgba(255,74,74,.3)}
+:root:not([data-theme=dark]){--sh:#101010}
 .pin,.fm{padding:clamp(18px,4vw,30px);display:flex;flex-direction:column;gap:16px}
 .pin{max-width:380px;margin:auto;align-items:center;text-align:center;width:100%}
 .dots{display:flex;gap:12px}.dots i{width:48px;height:58px;border:3px solid var(--bd);border-radius:14px;display:grid;place-items:center;background:var(--bg)}
@@ -11,16 +15,48 @@
 .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
 .keys button{font-family:'Archivo Black',sans-serif;font-size:1.5rem;padding:14px 0;color:var(--ink);background:var(--card);border:3px solid var(--bd);border-radius:18px;box-shadow:3px 3px 0 var(--sh);cursor:pointer}
 .keys button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--sh)}
-.tabs,.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.tabs button.on{background:var(--acc);color:#0b0b0b}
+.btn,.num{color:#fff}
 .fld{display:flex;flex-direction:column;gap:6px;font-weight:800;text-align:left}
 input,textarea,select{font:inherit;font-weight:500;padding:12px 14px;border:3px solid var(--bd);border-radius:14px;background:var(--bg);color:var(--ink);width:100%}
 textarea{resize:vertical;line-height:1.5}
 .row .ttl{flex:1;min-width:0}.acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.dng{background:#ff5a4d;color:#0b0b0b}
-.err{color:#ff5a4d;font-weight:800}
+.dng{background:#7a0b0e;color:#fff}
+.err{color:var(--acc);font-weight:800}
+/* top bar */
+.top{display:flex;flex-direction:column;gap:6px;padding-top:2px}
+.cluster{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.cluster .theme{position:static;order:3}
+.cluster #exitb{order:2}.cluster #backb{order:1}
+.circ{width:42px;height:42px;padding:0;justify-content:center}
+.circ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cluster .back svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.ttlc{text-align:center;font-size:1rem;color:var(--mute);padding:4px 0}
+/* big tabs */
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tabs button{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:clamp(1.05rem,4.4vw,1.5rem);padding:clamp(20px,5vw,30px) 10px;line-height:1.1;color:var(--ink);background:var(--card);border:3px solid var(--bd);border-radius:22px;box-shadow:5px 5px 0 var(--sh);cursor:pointer}
+.tabs button:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--sh)}
+.tabs button.on{background:var(--acc);color:#fff}
+/* plus button + fade */
+.afade{position:fixed;left:0;right:0;bottom:0;height:min(170px,26vh);z-index:4;pointer-events:none;background:linear-gradient(to bottom,transparent,var(--bg) 72%)}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));z-index:6;width:74px;height:74px;border-radius:50%;border:3px solid var(--bd);background:var(--acc);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:5px 5px 0 var(--sh)}
+.fab svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:3.4;stroke-linecap:round}
+.fab:active{transform:translate(calc(-50% + 3px),3px);box-shadow:1px 1px 0 var(--sh)}
+.pad{height:150px}
+/* form extras */
+.sec{font-family:'Silkscreen',monospace;text-transform:uppercase;font-size:.8rem;letter-spacing:.06em;color:var(--mute);margin-top:4px}
+.pastebar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mini{padding:7px 14px;font-size:.78rem}
+.file{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border:3px dashed var(--bd);border-radius:14px;background:var(--bg)}
+.file input{display:none}
+.file span{font-weight:500;color:var(--mute);word-break:break-all;flex:1;min-width:120px}
+.fbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 </style></head><body>
-<main><div class="logo px">&gt; Admin</div><div id="app"></div></main>
+<main><div class="top"><div class="cluster" id="cluster"></div><div class="ttlc px">Admin</div></div><div id="app"></div></main>
+<script>
+/* admin only: recolor the green background sparkles to red (lib.js is shared with the main site and stays untouched) */
+(function(){var d=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,"fillStyle");
+Object.defineProperty(CanvasRenderingContext2D.prototype,"fillStyle",{get:d.get,set:function(v){if(typeof v==="string")v=v.replace("rgba(46,232,79,","rgba(229,38,43,");d.set.call(this,v)}})})();
+</script>
 <script src="lib.js"></script>
 <script>
 const PIN="6767",{o,r}=repo();let tab="videos",token=localStorage.getItem("ghtoken")||"",notice="";
@@ -36,10 +72,32 @@ const del=(p,sha,m)=>gh(cp(p),{method:"DELETE",headers:{"Content-Type":"applicat
 const enc=t=>{const b=new TextEncoder().encode(t);let s="";for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode(...b.subarray(i,i+8192));return btoa(s)};
 const fb64=f=>new Promise((ok,no)=>{const x=new FileReader();x.onload=()=>ok(x.result.split(",")[1]);x.onerror=no;x.readAsDataURL(f)});
 const slug=t=>t.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,28);
-const explain=e=>e.status===401?"The GitHub token is wrong or expired. Tap Disconnect and add a new one.":e.status===403||e.status===404?"GitHub says no. Check the token allows 'Contents: Read and write' for the repository "+r+".":e.status===409||e.status===422?"A save clashed with another one. Wait a few seconds and try again.":"Something went wrong"+(e.status?" ("+e.status+")":"")+". Check your internet and try again.";
+const explain=e=>e.status===401?(localStorage.removeItem("ghtoken"),token="","The GitHub token is wrong or expired. Add a new one."):e.status===403||e.status===404?"GitHub says no. Check the token allows 'Contents: Read and write' for the repository "+r+".":e.status===409||e.status===422?"A save clashed with another one. Wait a few seconds and try again.":"Something went wrong"+(e.status?" ("+e.status+")":"")+". Check your internet and try again.";
 const btn=(c,t,f)=>{const b=el("button",c);b.type="button";b.textContent=t;b.onclick=f;return b};
 
+const IC_BACK='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+IC_EXIT='<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>',
+IC_PLUS='<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>';
+const cluster=$("cluster");
+const backb=el("button","back");backb.id="backb";backb.type="button";backb.innerHTML=IC_BACK+"Back";
+const exitb=el("button","back circ");exitb.id="exitb";exitb.type="button";exitb.innerHTML=IC_EXIT;exitb.setAttribute("aria-label","Exit admin");exitb.title="Exit";
+cluster.append(backb,exitb);
+const tb=document.querySelector("body > .theme");if(tb)cluster.append(tb);
+const fade=el("div","afade"),fab=el("button","fab");fab.type="button";fab.innerHTML=IC_PLUS;fab.setAttribute("aria-label","Add new");
+document.body.append(fade,fab);
+let goBack=()=>{location.href="index.html"};
+backb.onclick=()=>goBack();
+exitb.onclick=()=>{sessionStorage.removeItem("adm");gate()};
+// v: "gate" | "connect" | "dash" | "form"
+function view(v){
+ fade.hidden=fab.hidden=v!=="dash";
+ exitb.hidden=v==="gate";
+ goBack=v==="form"?()=>dash():()=>{location.href="index.html"};
+ scrollTo(0,0);
+}
+
 function gate(){
+ view("gate");
  app.innerHTML='<div class="card pin"><h1>Admin</h1><p class="px hint">Enter PIN</p><div class="dots" id="dots"><i></i><i></i><i></i><i></i></div><p class="hint" id="pm">&nbsp;</p><div class="keys" id="keys"></div></div>';
  let v="",busy=false;const dots=[...document.querySelectorAll("#dots i")];
  const paint=()=>dots.forEach((d,i)=>d.classList.toggle("on",i<v.length));
@@ -52,28 +110,30 @@ function gate(){
 }
 function start(){token?dash():connect()}
 function connect(m){
+ view("connect");
  app.innerHTML='<div class="card fm"><h1>Connect GitHub</h1><p class="hint">Repository: <b></b></p><label class="fld">GitHub token<input id="tok" type="password" autocomplete="off" placeholder="github_pat_..."></label><p class="hint">Paste it once. It is kept only in this browser.</p><p class="err" id="cm"></p><div class="bar"></div></div>';
  app.querySelector("b").textContent=o+"/"+r;if(m)$("cm").textContent=m;
  app.querySelector(".bar").append(btn("btn","Connect",async()=>{token=$("tok").value.trim();
   try{const j=await gh("");if(!j.permissions||!j.permissions.push)throw{status:403};localStorage.setItem("ghtoken",token);dash()}catch(e){token="";$("cm").textContent=explain(e)}}));
 }
 async function dash(){
- app.innerHTML='<div style="display:flex;flex-direction:column;gap:18px"><div class="tabs"></div><div class="bar"></div><p class="hint" id="nt"></p><div class="list" id="items"></div></div>';
- const tabs=app.querySelector(".tabs"),bar=app.querySelector(".bar");
- [["videos","Final Videos"],["scripts","Video Scripts"]].forEach(([k,l])=>{const b=btn("back"+(tab===k?" on":""),l,()=>{tab=k;dash()});tabs.append(b)});
- bar.append(btn("btn","+ Add new",()=>form(null)),btn("back","Disconnect",()=>{localStorage.removeItem("ghtoken");token="";connect()}));
+ view("dash");
+ app.innerHTML='<div style="display:flex;flex-direction:column;gap:18px"><div class="tabs"></div><p class="hint" id="nt"></p><div class="list" id="items"></div><div class="pad"></div></div>';
+ const tabs=app.querySelector(".tabs");
+ [["videos","Final Videos"],["scripts","Video Scripts"]].forEach(([k,l])=>{tabs.append(btn(tab===k?"on":"",l,()=>{tab=k;dash()}))});
+ fab.onclick=()=>form(null);
  $("nt").textContent=notice;notice="";
  const box=$("items");box.append(msg("Loading..."));
  try{
   const names=natural((await ls(tab)).filter(x=>x.type==="dir").map(x=>x.name)).reverse();
   const ts=await Promise.all(names.map(n=>raw(tab+"/"+n+"/info.txt").then(t=>parseInfo(t).title||pretty(n)).catch(()=>pretty(n))));
-  box.innerHTML="";if(!names.length)box.append(msg("Nothing here yet. Tap + Add new."));
+  box.innerHTML="";if(!names.length)box.append(msg("Nothing here yet. Tap the + button."));
   names.forEach((n,i)=>{const row=el("div","card row"),num=el("span","num"),t=el("span","ttl"),a=el("div","acts");
    num.textContent=numOf(n,0);t.textContent=ts[i];
    const idle=()=>{a.innerHTML="";a.append(btn("back","Edit",()=>form(n)),btn("back","Delete",ask))};
    const ask=()=>{a.innerHTML="";a.append(btn("back dng","Yes, delete",()=>remove(n,a)),btn("back","Cancel",idle))};
    idle();row.append(num,t,a);box.append(row)});
- }catch(e){box.innerHTML="";box.append(msg(explain(e)))}
+ }catch(e){box.innerHTML="";box.append(msg(explain(e)));if(e.status===401)setTimeout(()=>connect(),1500)}
 }
 async function remove(n,a){
  a.textContent="Deleting...";
@@ -82,29 +142,36 @@ async function remove(n,a){
  dash();
 }
 async function form(item){
+ view("form");
  const sc=tab==="scripts",k=tab;
  app.innerHTML='<div class="card fm"><h1></h1>'+
-  '<label class="fld">Title<input id="ft"></label>'+
-  '<label class="fld">'+(sc?"Instagram video link":"YouTube link (clients watch this)")+'<input id="fv" placeholder="https://..."></label>'+
-  (sc?"":'<label class="fld">Google Drive link (for the Download button)<input id="fd" placeholder="https://drive.google.com/..."></label>')+
-  '<label class="fld">Video shape<select id="fs"><option value="vertical">Vertical (reel)</option><option value="wide">Wide (16:9)</option></select></label>'+
-  (sc?'<label class="fld">Script text<textarea id="fx" rows="14" placeholder="One line per line. Blank line = new paragraph. Put *stars* around bold lines."></textarea></label><label class="fld">Audio (MP3 only)<input id="fa" type="file" accept=".mp3,audio/mpeg"></label>':"")+
-  '<p class="hint" id="st"></p><div class="bar"></div></div>';
+  '<label class="fld">'+(sc?"Header (title)":"Title")+'<input id="f_t" placeholder="'+(sc?"Script header":"Video title")+'"></label>'+
+  '<label class="fld">'+(sc?"Instagram reel link":"YouTube link (clients watch this)")+'<input id="f_v" inputmode="url" placeholder="https://..."></label>'+
+  (sc?"":'<label class="fld">Google Drive link (for the Download button)<input id="f_d" inputmode="url" placeholder="https://drive.google.com/..."></label>')+
+  '<label class="fld">Video shape<select id="f_s"><option value="vertical">Vertical (reel)</option><option value="wide">Wide (16:9)</option></select></label>'+
+  (sc?'<div class="fld"><div class="pastebar"><span>Script text</span><button type="button" class="back mini" id="f_paste">Paste</button></div><textarea id="f_x" rows="14" placeholder="Paste or type the script here. One line per line. Blank line = new paragraph. Put *stars* around bold lines."></textarea></div>'+
+   '<div class="fld"><span>Audio file (MP3)</span><label class="file"><input id="f_a" type="file" accept=".mp3,audio/mpeg"><span class="back" id="f_pick">Choose MP3</span><span id="f_an">No file chosen</span></label></div>':"")+
+  '<p class="hint" id="st"></p><div class="fbar"></div></div>';
  app.querySelector("h1").textContent=(item?"Edit ":"New ")+(sc?"script":"video");
  const st=m=>{$("st").textContent=m},sh={};
- const bar=app.querySelector(".bar"),save=btn("btn","Save",go),cancel=btn("back","Cancel",dash);bar.append(save,cancel);
+ const bar=app.querySelector(".fbar"),save=btn("btn","Save",go),cancel=btn("back","Cancel",dash);bar.append(save,cancel);
+ if(sc){
+  $("f_a").onchange=()=>{const f=$("f_a").files[0];$("f_an").textContent=f?f.name:(item?"Keeping current audio":"No file chosen")};
+  $("f_paste").onclick=async()=>{try{const t=await navigator.clipboard.readText();const x=$("f_x");x.value=x.value?x.value+"\n"+t:t}catch(e){st("Your browser blocked pasting. Long-press inside the box and choose Paste.")}};
+  if(item)$("f_an").textContent="Keeping current audio (choose a file to replace it)";
+ }
  if(item){st("Loading...");save.disabled=true;
   try{(await ls(k+"/"+item)).forEach(f=>sh[f.name]=f.sha);
    const i=parseInfo(await raw(k+"/"+item+"/info.txt").catch(()=>""));
-   $("ft").value=i.title||pretty(item);$("fv").value=i.video;if(!sc)$("fd").value=i.download;$("fs").value=i.wide?"wide":"vertical";
-   if(sc)$("fx").value=await raw(k+"/"+item+"/script.txt").catch(()=>"");st("")}
+   $("f_t").value=i.title||pretty(item);$("f_v").value=i.video;if(!sc)$("f_d").value=i.download;$("f_s").value=i.wide?"wide":"vertical";
+   if(sc)$("f_x").value=await raw(k+"/"+item+"/script.txt").catch(()=>"");st("")}
   catch(e){st(explain(e));return}
   save.disabled=false}
  async function go(){
-  const t=$("ft").value.trim(),v=$("fv").value.trim(),d=sc?"":$("fd").value.trim(),w=$("fs").value==="wide";
+  const t=$("f_t").value.trim(),v=$("f_v").value.trim(),d=sc?"":$("f_d").value.trim(),w=$("f_s").value==="wide";
   if(!t)return st("Please enter a title.");
   let tx="",au=null;
-  if(sc){tx=$("fx").value.replace(/\r/g,"").trim();au=$("fa").files[0]||null;
+  if(sc){tx=$("f_x").value.replace(/\r/g,"").trim();au=$("f_a").files[0]||null;
    if(!tx)return st("Please paste the script text.");
    if(!item&&!au)return st("Please choose the MP3 audio file.");
    if(au&&!/\.mp3$/i.test(au.name))return st("Audio must be an MP3 file.");
