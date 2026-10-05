@@ -1,0 +1,1 @@
+window.FB={url:"https://qulzcqndrmzhswtpnmdf.supabase.co/rest/v1/",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1bHpjcW5kcm16aHN3dHBubWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTk4MjMsImV4cCI6MjEwNjc5NTgyM30.D_NfdEimaPf8rNu5n1WiDOp7ZIBSXNeDfSHJuvBcCOg"};

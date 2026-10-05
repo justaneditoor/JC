@@ -6,8 +6,10 @@
 <main style="padding-bottom:210px">
 <a class="back" href="scripts.html">&larr; All scripts</a>
 <header class="card"><h1 id="title">Loading...</h1></header>
+<div id="vb"></div>
 <div class="card" id="res" hidden></div>
 <article class="card" id="box"><p class="note">Loading audio and syncing the text...</p></article>
+<div id="fbv"></div>
 </main>
 <div class="fade"></div>
 <div class="dock">
@@ -17,7 +19,7 @@
   <div class="time"><b id="cur">0:00</b> <i>/</i> <b id="tot">0:00</b></div></div>
 </div>
 <audio id="audio" preload="auto"></audio>
-<script src="lib.js?v=9"></script><script src="align.js?v=9"></script>
+<script src="config.js"></script><script src="lib.js?v=9"></script><script src="align.js?v=9"></script><script src="fb.js"></script>
 <script>
 const audio=$("audio"),box=$("box"),btn=$("play"),bar=$("bar");
 const PLAY='<svg viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></svg>',PAUSE='<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
@@ -32,10 +34,13 @@ function follow(e){
 }
 async function init(){
  if(!folder)return fail("No script selected. Go back to All scripts.");
- const info=await readInfo("scripts",folder);
+ const V=+(new URLSearchParams(location.search).get("v"))||1,vs=await versions("scripts",folder);
+ let info=V>1?await readInfo("scripts/"+folder,"v"+V):await readInfo("scripts",folder);if(V>1&&!info.live)info=await readInfo("scripts",folder);
+ if(vs.length>1)$("vb").append(vbar(vs,V,n=>"player.html?s="+encodeURIComponent(folder)+(n>1?"&v="+n:"")));
+ $("fbv").append(thread(fkey("scripts",folder),V,{title:cap(info.title),sno:numOf(folder,0)}));
  $("title").textContent=cap(info.title);$("np").textContent=info.title;document.title=info.title;
  if(info.video){$("res").hidden=false;$("res").append(buildEmbed(info.video,info.wide,true))}
- const base="scripts/"+encodeURIComponent(folder)+"/";let txt,ab;
+ const base="scripts/"+encodeURIComponent(folder)+(V>1?"/v"+V:"")+"/";let txt,ab;
  try{
   const [a,b]=await Promise.all([fetch(base+"script.txt?"+Date.now()),fetch(base+"audio.mp3")]);
   if(a.status===404||b.status===404){box.innerHTML="";box.append(cookBox());return}

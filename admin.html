@@ -59,8 +59,9 @@ textarea{resize:vertical;line-height:1.5}
 (function(){var d=Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype,"fillStyle");
 Object.defineProperty(CanvasRenderingContext2D.prototype,"fillStyle",{get:d.get,set:function(v){if(typeof v==="string")v=v.replace("rgba(46,232,79,","rgba(229,38,43,");d.set.call(this,v)}})})();
 </script>
-<script src="lib.js?v=9"></script>
+<script src="config.js"></script><script src="lib.js?v=9"></script><script src="fb.js"></script>
 <script>
+const FK=()=>localStorage.fbkey||(localStorage.fbkey=prompt("Feedback admin key (from setup.sql)")||"");
 const PIN="6767",{o,r}=repo();let tab="videos",token=localStorage.getItem("ghtoken")||"",notice="";
 const app=$("app"),base="https://api.github.com/repos/"+o+"/"+r;
 const hdr=(x={})=>({Accept:"application/vnd.github+json",Authorization:"Bearer "+token,...x});
@@ -83,7 +84,7 @@ IC_PLUS='<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>';
 const cluster=$("cluster");
 const backb=el("button","back");backb.id="backb";backb.type="button";backb.innerHTML=IC_BACK+"Back";
 const exitb=el("button","back circ");exitb.id="exitb";exitb.type="button";exitb.innerHTML=IC_EXIT;exitb.setAttribute("aria-label","Exit admin");exitb.title="Exit";
-cluster.prepend(backb);const rt=$("rt");rt.append(exitb);
+cluster.prepend(backb);const rt=$("rt");const bell=el("button","back circ bell");bell.type="button";bell.innerHTML='<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></svg>';rt.append(bell,exitb);
 const tb=document.querySelector("body > .theme");if(tb)rt.append(tb);
 const fade=el("div","afade"),fab=el("button","fab");fab.type="button";fab.innerHTML=IC_PLUS;fab.setAttribute("aria-label","Add new");
 document.body.append(fade,fab);
@@ -92,7 +93,7 @@ backb.onclick=()=>goBack();
 exitb.onclick=()=>{sessionStorage.removeItem("adm");gate()};
 // v: "gate" | "connect" | "dash" | "form"
 function view(v){
- fade.hidden=fab.hidden=v!=="dash";
+ fade.hidden=fab.hidden=v!=="dash";bell.hidden=v==="gate"||v==="connect";
  exitb.hidden=v==="gate";
  goBack=v==="form"?()=>dash():()=>{location.href="index.html"};
  scrollTo(0,0);
@@ -124,7 +125,7 @@ async function dash(){
  const tabs=app.querySelector(".tabs");
  [["videos","Video"],["scripts","Script"]].forEach(([k,l])=>{tabs.append(btn(tab===k?"on":"",l,()=>{tab=k;dash()}))});
  fab.onclick=()=>form(null);
- $("nt").textContent=notice;notice="";
+ $("nt").textContent=notice;notice="";notifs();bell.onclick=()=>scrollTo({top:0,behavior:"smooth"});
  const box=$("items");box.append(msg("Loading..."));
  try{
   const names=natural((await ls(tab)).filter(x=>x.type==="dir").map(x=>x.name)).reverse();
@@ -137,15 +138,33 @@ async function dash(){
    idle();row.append(num,t,a);box.append(row)});
  }catch(e){box.innerHTML="";box.append(msg(explain(e)));if(e.status===401)setTimeout(()=>connect(),1500)}
 }
+async function notifs(){
+ try{const rows=await(await sb("fb?role=eq.client&read=eq.false&order=id")).json();bell.querySelector("i")?.remove();bell.classList.toggle("ring",rows.length>0);
+  if(!rows.length)return;const b=el("i");b.textContent=rows.length;bell.append(b);const box=el("div","list");$("nt").after(box);
+  const nums={};for(const kd of["scripts","videos"])(await ls(kd)).filter(x=>x.type==="dir").forEach(x=>nums[kd+"/"+x.name.replace(/^\d+-?/,"")]=[x.name,numOf(x.name,0)]);
+  rows.forEach(m=>{const [fo,no]=nums[m.item]||[null,m.sno],kd=m.item.split("/")[0],d=el("div","card notif");
+   d.innerHTML="<b></b><p></p>";d.firstChild.textContent=(kd==="videos"?"Video ":"Script ")+no+" · "+(m.title||"")+" · V"+m.ver;d.lastChild.textContent=m.name+": "+(m.body||(m.mtype+" message"));
+   d.onclick=async()=>{await sb("rpc/fb_admin_read",{method:"POST",body:JSON.stringify({k:FK(),x:rows.filter(x=>x.item===m.item&&x.ver===m.ver).map(x=>x.id)})});
+    location.href=(kd==="videos"?"video.html?f=":"player.html?s=")+encodeURIComponent(fo||"")+(m.ver>1?"&v="+m.ver:"")+"#fb"};box.append(d)})}catch(e){}}
+async function renum(k,n){
+ const R=await gh("/git/ref/heads/main"),cm=await gh("/git/commits/"+R.object.sha),tr=await gh("/git/trees/"+cm.tree.sha+"?recursive=1");
+ const bl=tr.tree.filter(x=>x.type==="blob"&&x.path.startsWith(k+"/")),fo=natural([...new Set(bl.map(x=>x.path.split("/")[1]))]).filter(f=>f!==n),
+ nn={};fo.forEach((f,i)=>nn[f]=String(i+1).padStart(2,"0")+"-"+f.replace(/^\d+-?/,""));
+ const add=bl.filter(x=>nn[x.path.split("/")[1]]).map(x=>{const p=x.path.split("/");p[1]=nn[p[1]];return{path:p.join("/"),mode:x.mode,type:"blob",sha:x.sha}}),
+ keep=new Set(add.map(x=>x.path)),dl=bl.map(x=>x.path).filter(p=>!keep.has(p)).map(path=>({path,mode:"100644",type:"blob",sha:null}));
+ const t=await gh("/git/trees",{method:"POST",body:JSON.stringify({base_tree:cm.tree.sha,tree:[...add,...dl]})}),
+ c=await gh("/git/commits",{method:"POST",body:JSON.stringify({message:"Delete "+n+" and renumber",tree:t.sha,parents:[cm.sha]})});
+ await gh("/git/refs/heads/main",{method:"PATCH",body:JSON.stringify({sha:c.sha})});
+ await sb("rpc/fb_admin_del",{method:"POST",body:JSON.stringify({k:FK(),i:fkey(k,n)})})}
 async function remove(n,a){
  a.textContent="Deleting...";
- try{const fs=await ls(tab+"/"+n);for(const f of fs)await del(tab+"/"+n+"/"+f.name,f.sha,"Delete "+n);notice="Deleted. GitHub needs 1-3 minutes to publish it to the live site."}
+ try{await renum(tab,n);notice="Deleted and renumbered. GitHub needs 1-3 minutes to publish it to the live site."}
  catch(e){notice=explain(e)}
  dash();
 }
-async function form(item){
+async function form(item,ver=1,fresh=false){
  view("form");
- const sc=tab==="scripts",k=tab;
+ const sc=tab==="scripts",k=tab,P=item?k+"/"+item+(ver>1?"/v"+ver:""):"";
  app.innerHTML='<div class="card fm"><h1></h1>'+
   '<label class="fld">'+(sc?"Header (title)":"Title")+'<input id="f_t" placeholder="'+(sc?"Script header":"Video title")+'"></label>'+
   '<label class="fld">'+(sc?"Instagram reel link":"YouTube link (clients watch this)")+'<input id="f_v" inputmode="url" placeholder="https://..."></label>'+
@@ -154,7 +173,7 @@ async function form(item){
   (sc?'<div class="fld"><div class="pastebar"><span>Script text</span><button type="button" class="back mini" id="f_paste">Paste</button></div><textarea id="f_x" rows="14" placeholder="Paste or type the script here. One line per line. Blank line = new paragraph. Put *stars* around bold lines."></textarea></div>'+
    '<div class="fld"><span>Audio file (MP3)</span><label class="file"><input id="f_a" type="file" accept=".mp3,audio/mpeg"><span class="back" id="f_pick">Choose MP3</span><span id="f_an">No file chosen</span></label></div>':"")+
   '<p class="hint" id="st"></p><div class="fbar"></div></div>';
- app.querySelector("h1").textContent=(item?"Edit ":"New ")+(sc?"script":"video");
+ app.querySelector("h1").textContent=(item?"Edit ":"New ")+(sc?"script":"video")+(item?" · V"+ver:"");
  const st=m=>{$("st").textContent=m},sh={};
  const bar=app.querySelector(".fbar"),save=btn("btn","Save",go),cancel=btn("back","Cancel",dash);bar.append(save,cancel);
  if(sc){
@@ -162,25 +181,28 @@ async function form(item){
   $("f_paste").onclick=async()=>{try{const t=await navigator.clipboard.readText();const x=$("f_x");x.value=x.value?x.value+"\n"+t:t}catch(e){st("Your browser blocked pasting. Long-press inside the box and choose Paste.")}};
   if(item)$("f_an").textContent="Keeping current audio (choose a file to replace it)";
  }
- if(item){st("Loading...");save.disabled=true;
-  try{(await ls(k+"/"+item)).forEach(f=>sh[f.name]=f.sha);
-   const i=parseInfo(await raw(k+"/"+item+"/info.txt").catch(()=>""));
+ if(item&&!fresh){st("Loading...");save.disabled=true;
+  try{(await ls(P)).filter(f=>f.type==="file").forEach(f=>sh[f.name]=f.sha);
+   const i=parseInfo(await raw(P+"/info.txt").catch(()=>""));
    $("f_t").value=i.title||pretty(item);$("f_v").value=i.video;if(!sc)$("f_d").value=i.download;$("f_s").value=i.wide?"wide":"vertical";
-   if(sc)$("f_x").value=await raw(k+"/"+item+"/script.txt").catch(()=>"");st("")}
+   if(sc)$("f_x").value=await raw(P+"/script.txt").catch(()=>"");st("")}
   catch(e){st(explain(e));return}
   save.disabled=false}
+ if(item){const vw=el("div","card fm"),vh=el("h2","px");vh.textContent="Versions";const vr=el("div","vbar");vw.append(vh,vr);app.append(vw);
+  versions(k,item).then(vs=>{vs.forEach(n=>vr.append(btn("vb"+(n===ver&&!fresh?" on":""),"V"+n,()=>form(item,n))));const nx=vs[vs.length-1]+1;vr.append(btn("vb","+ Add V"+nx,()=>form(item,nx,true)))});
+  if(!fresh)app.append(thread(fkey(k,item),ver,{admin:true,key:FK}))}
  async function go(){
   const t=$("f_t").value.trim(),v=$("f_v").value.trim(),d=sc?"":$("f_d").value.trim(),w=$("f_s").value==="wide";
   if(!t)return st("Please enter a title.");
   let tx="",au=null;
   if(sc){tx=$("f_x").value.replace(/\r/g,"").trim();au=$("f_a").files[0]||null;
    if(!tx)return st("Please paste the script text.");
-   if(!item&&!au)return st("Please choose the MP3 audio file.");
+   if((!item||fresh)&&!au)return st("Please choose the MP3 audio file.");
    if(au&&!/\.mp3$/i.test(au.name))return st("Audio must be an MP3 file.");
    if(au&&au.size>25*1024*1024)return st("That audio is over 25 MB. Export it smaller (96 kbps mono).")}
   save.disabled=true;
   try{
-   let folder=item;
+   let folder=item?P:item;
    if(!item){const dirs=(await ls(k)).filter(x=>x.type==="dir").map(x=>x.name);
     folder=String(Math.max(0,...dirs.map(n=>+(n.match(/^\d+/)||[0])[0]))+1).padStart(2,"0")+"-"+(slug(t)||"item")}
    const info="Title: "+t+"\nVideo: "+v+(d?"\nDownload: "+d:"")+"\nShape: "+(w?"wide":"vertical")+"\n";

@@ -5,14 +5,19 @@
 <main>
 <a class="back" href="videos.html">&larr; All videos</a>
 <header class="card"><h1 id="title">Loading...</h1></header>
+<div id="vb"></div>
 <div class="card" id="res"></div>
+<div id="fbv"></div>
 </main>
-<script src="lib.js?v=9"></script>
+<script src="config.js"></script><script src="lib.js?v=9"></script><script src="fb.js"></script>
 <script>
 const f=new URLSearchParams(location.search).get("f");
 (async()=>{
  if(!f){$("title").textContent="No video selected";return}
- const info=await readInfo("videos",f);
+ const V=+(new URLSearchParams(location.search).get("v"))||1,vs=await versions("videos",f);
+ let info=V>1?await readInfo("videos/"+f,"v"+V):await readInfo("videos",f);if(V>1&&!info.live)info=await readInfo("videos",f);
+ if(vs.length>1)$("vb").append(vbar(vs,V,n=>"video.html?f="+encodeURIComponent(f)+(n>1?"&v="+n:"")));
+ $("fbv").append(thread(fkey("videos",f),V,{title:cap(info.title),sno:numOf(f,0)}));
  $("title").textContent=cap(info.title);document.title=info.title;
  if(!info.video){$("res").classList.add("cook-wrap");$("res").append(cookBox());return}
  const w=buildEmbed(info.video,info.wide,false),dl=driveDownload(info.download||"")||driveDownload(info.video);
