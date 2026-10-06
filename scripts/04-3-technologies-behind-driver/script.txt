@@ -1,0 +1,27 @@
+Indha video-la irukkura technology pathi 3 interesting points-ah pathi dhan naan innikku pesa poren.
+
+1. AI Perception
+
+Idhu just oru Tesla maathiri-aana Autopilot car kedayadhu, ena most of the Tesla systems still require an attentive human driver.
+
+*Aana indha car-la driver badhila, cameras, LiDAR, radar, GPS and AI irukku. Road-la enna nadakkudhu-nu continuously sense panni, AI decision eduthu steering, braking, acceleration ellathayum control pannudhu.*
+
+Adhu mattum illaama, munnadi oru vehicle sudden-ah brake potta, pedestrian cross panna vandha, illa road-la oru obstacle irundha, adha detect panni situation-ku yetha maadhiri speed-ah reduce panni, thevai-na stop panni, safe-ah continue pannum.
+
+2. Autonomous Intelligence
+
+*China-la idha just experiment-aa vechikala. Baidu-oda Apollo Go maadhiri companies designated areas-la fully driverless robotaxi services-ah already operate pannitu irukkaanga. US-la Waymo and Dubai maadhiri places-layum robotaxi expansion nadakkudhu.*
+
+Oru taxi 24/7 operate panna mudinja, driver dependency reduce aagum. Same fleet-la more rides complete panna mudiyum. So labour cost mattum illaama, fleet utilisation-um productivity-um improve aagum.
+
+3. Real-World Scalability  
+
+India technology India-ku Varuna? Nu ketingana
+
+*Inga technology mattum problem illa. India-oda unpredictable traffic, pedestrians, two-wheelers, road conditions, regulations and safety responsibility ellame big challenges.*
+
+Adhanaala dhaan Tesla-kooda India-la launch pannina models-la full automated driving-ah immediately offer pannala.
+
+*But future-la, airports, tech parks, gated areas maadhiri controlled places-la, indha cars-ku dedicated routes and road structure create panni operate panna mudiyum. Adhu successful-a irundha, gradually innum pala areas-kku expand panna chances irukku.*
+
+so, Indha 3 technology-um ungalukku clear-ah purinjirundha, comments-la “Clear” nu type pannitu, AI pathi learn pannura unga friend-ku Indha video-va share pannidunga!
