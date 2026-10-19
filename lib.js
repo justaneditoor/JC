@@ -45,7 +45,7 @@ function embedInfo(u){
 }
 function buildEmbed(url,wide,showOpen){
  const i=embedInfo(url),w=el("div","vid");
- if(i){const fr=el("div","frame "+(i.type==="ig"?"ig":wide?"w":"v")),f=el(i.type==="mp4"?"video":"iframe");
+ if(i){const fr=el("div","frame "+(i.type==="ig"?"ig":wide?"wide":"v")),f=el(i.type==="mp4"?"video":"iframe");
   f.src=i.src;
   if(i.type==="mp4"){f.controls=true;f.playsInline=true;f.preload="metadata"}
   else{f.title="Video";f.loading="lazy";f.allowFullscreen=true;f.allow="autoplay; fullscreen; picture-in-picture; encrypted-media"}
